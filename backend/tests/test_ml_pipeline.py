@@ -1,5 +1,6 @@
 """Tests for data handling, leakage prevention, inference and metric honesty."""
 
+import hashlib
 import json
 import shutil
 
@@ -128,9 +129,10 @@ class TestValidation:
         with pytest.raises(InvalidFeaturesError):
             validate_features("period2", {**FEATURES, field: value})
 
-    def test_unknown_stage(self):
+    @pytest.mark.parametrize("stage", ["final", ["period1"], None, 1])
+    def test_unknown_stage(self, stage):
         with pytest.raises(InvalidFeaturesError, match="Unknown stage"):
-            validate_features("final", FEATURES)
+            validate_features(stage, FEATURES)
 
 
 class TestInference:
@@ -139,11 +141,22 @@ class TestInference:
         result = pipeline.predict(stage, FEATURES)
         assert 0 <= result.risk_probability <= 1
         assert result.confidence == pytest.approx(
-            max(result.risk_probability, 1 - result.risk_probability), abs=1e-3)
+            result.risk_probability if result.predicted_at_risk else 1 - result.risk_probability,
+            abs=1e-3)
         assert 0 <= result.grade_interval_low <= result.predicted_grade
         assert result.predicted_grade <= result.grade_interval_high <= 20
         assert result.risk_level in {"low", "moderate", "high"}
         assert {c.feature for c in result.contributions} == set(STAGES[stage].features)
+
+    @pytest.mark.parametrize("stage", list(STAGES))
+    def test_confidence_always_describes_what_the_flag_says(self, pipeline, splits, stage):
+        """A flagged student's confidence is the chance of a grade below pass, even under 50%."""
+        columns = STAGES[stage].features
+        for raw in splits.test[columns].head(60).to_dict("records"):
+            result = pipeline.predict(stage, {**raw, "failures": min(raw["failures"], 3)})
+            expected = (result.risk_probability if result.predicted_at_risk
+                        else 1 - result.risk_probability)
+            assert result.confidence == pytest.approx(expected, abs=1e-3)
 
     def test_much_lower_grades_raise_risk(self, pipeline):
         strong = pipeline.predict("period2", {**FEATURES, "G1": 17, "G2": 17})
@@ -175,6 +188,30 @@ class TestInference:
         with (tmp_path / "intake_classifier.joblib").open("ab") as handle:
             handle.write(b"tampered")
         with pytest.raises(ModelUnavailableError, match="Integrity"):
+            PredictionPipeline(tmp_path)
+
+    @staticmethod
+    def _copy_artifacts(target):
+        for item in ARTIFACT_DIR.iterdir():
+            if item.is_file():
+                shutil.copy(item, target / item.name)
+        return json.loads((target / "metadata.json").read_text(encoding="utf-8"))
+
+    @pytest.mark.parametrize("content", ["{oops", "[]", "{}", '{"version": "1"}',
+                                         '{"version": "1", "stages": {"intake": {}}}'])
+    def test_damaged_metadata_is_reported_as_unavailable(self, tmp_path, content):
+        self._copy_artifacts(tmp_path)
+        (tmp_path / "metadata.json").write_text(content, encoding="utf-8")
+        with pytest.raises(ModelUnavailableError, match="ml.train"):
+            PredictionPipeline(tmp_path)
+
+    def test_unreadable_model_with_a_matching_hash_is_reported_as_unavailable(self, tmp_path):
+        metadata = self._copy_artifacts(tmp_path)
+        (tmp_path / "intake_classifier.joblib").write_bytes(b"junk")
+        metadata["stages"]["intake"]["classifier"]["artifact_sha256"] = hashlib.sha256(
+            b"junk").hexdigest()
+        (tmp_path / "metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
+        with pytest.raises(ModelUnavailableError, match="Could not load"):
             PredictionPipeline(tmp_path)
 
 
