@@ -1,0 +1,147 @@
+{
+  "shape": {
+    "rows": 1044,
+    "raw_columns": 33
+  },
+  "cleaning": {
+    "rows_by_subject": {
+      "portuguese": 649,
+      "math": 395
+    },
+    "missing_values": 0,
+    "exact_duplicates_removed": 0,
+    "out_of_range_removed": 0,
+    "rows_after_cleaning": 1044,
+    "distinct_student_groups": 662,
+    "groups_in_both_subjects": 366,
+    "zero_final_with_nonzero_g2": 33
+  },
+  "column_types": {
+    "numeric": [
+      "age",
+      "Medu",
+      "Fedu",
+      "traveltime",
+      "studytime",
+      "failures",
+      "famrel",
+      "freetime",
+      "goout",
+      "Dalc",
+      "Walc",
+      "health",
+      "absences",
+      "G1",
+      "G2",
+      "G3"
+    ],
+    "categorical": [
+      "school",
+      "sex",
+      "address",
+      "famsize",
+      "Pstatus",
+      "Mjob",
+      "Fjob",
+      "reason",
+      "guardian",
+      "schoolsup",
+      "famsup",
+      "paid",
+      "activities",
+      "nursery",
+      "higher",
+      "internet",
+      "romantic",
+      "subject"
+    ]
+  },
+  "final_grade_by_subject": {
+    "math": {
+      "n": 395,
+      "mean": 10.42,
+      "median": 11.0,
+      "std": 4.58,
+      "below_pass_rate": 0.3291,
+      "zero_finals": 38
+    },
+    "portuguese": {
+      "n": 649,
+      "mean": 11.91,
+      "median": 12.0,
+      "std": 3.23,
+      "below_pass_rate": 0.1541,
+      "zero_finals": 15
+    }
+  },
+  "final_grade_histogram": {
+    "math": {
+      "0": 38,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 1,
+      "5": 7,
+      "6": 15,
+      "7": 9,
+      "8": 32,
+      "9": 28,
+      "10": 56,
+      "11": 47,
+      "12": 31,
+      "13": 31,
+      "14": 27,
+      "15": 33,
+      "16": 16,
+      "17": 6,
+      "18": 12,
+      "19": 5,
+      "20": 1
+    },
+    "portuguese": {
+      "0": 15,
+      "1": 1,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1,
+      "6": 3,
+      "7": 10,
+      "8": 35,
+      "9": 35,
+      "10": 97,
+      "11": 104,
+      "12": 72,
+      "13": 82,
+      "14": 63,
+      "15": 49,
+      "16": 36,
+      "17": 29,
+      "18": 15,
+      "19": 2,
+      "20": 0
+    }
+  },
+  "absences": {
+    "median": 2.0,
+    "max": 75,
+    "skew": 3.74
+  },
+  "correlation_with_g3": {
+    "G2": 0.911,
+    "G1": 0.809,
+    "failures": -0.383,
+    "Medu": 0.201,
+    "studytime": 0.162,
+    "Fedu": 0.16,
+    "Dalc": -0.13,
+    "age": -0.125,
+    "Walc": -0.116,
+    "traveltime": -0.103,
+    "goout": -0.098,
+    "health": -0.08,
+    "freetime": -0.065,
+    "famrel": 0.054,
+    "absences": -0.046
+  }
+}

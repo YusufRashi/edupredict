@@ -1,0 +1,28 @@
+# Secrets and local config
+.env
+.env.local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Models are rebuilt reproducibly with `python -m ml.train` (Docker does this at build time)
+backend/ml/artifacts/*
+!backend/ml/artifacts/.gitkeep
+
+# Uploaded student data must never reach git
+backend/uploads/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+
+# Tooling
+.DS_Store
+.vscode/
+.claude/
