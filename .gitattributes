@@ -1,0 +1,7 @@
+# Keep LF everywhere, so shell scripts run in Linux containers on any host.
+* text=auto eol=lf
+
+# Dataset files are hashed for provenance and must stay byte-identical.
+backend/ml/data/raw/* -text
+
+*.png binary

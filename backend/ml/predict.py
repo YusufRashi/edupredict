@@ -58,7 +58,7 @@ class PredictionResult:
 
 def validate_features(stage: str, features: dict[str, Any]) -> dict[str, Any]:
     """Return only the features this stage uses, or raise with every problem found."""
-    if stage not in STAGES:
+    if not isinstance(stage, str) or stage not in STAGES:
         raise InvalidFeaturesError(f"Unknown stage '{stage}'. Use one of: {', '.join(STAGES)}.")
     clean: dict[str, Any] = {}
     errors: list[str] = []
@@ -73,9 +73,12 @@ def validate_features(stage: str, features: dict[str, Any]) -> dict[str, Any]:
             else:
                 clean[name] = value
         else:
-            if isinstance(value, bool) or int(value) != value:
+            whole = (isinstance(value, int) and not isinstance(value, bool)) or (
+                isinstance(value, float) and value.is_integer())
+            if not whole:
                 errors.append(f"{spec.label} must be a whole number.")
-            elif not spec.minimum <= value <= spec.maximum:
+            elif ((spec.minimum is not None and value < spec.minimum)
+                  or (spec.maximum is not None and value > spec.maximum)):
                 errors.append(f"{spec.label} must be between {spec.minimum} and {spec.maximum}.")
             else:
                 clean[name] = int(value)
@@ -92,23 +95,33 @@ class PredictionPipeline:
             raise ModelUnavailableError(
                 f"No trained model at {self.artifact_dir}. Run: python -m ml.train"
             )
-        self.metadata: dict = json.loads(metadata_path.read_text(encoding="utf-8"))
-        self.version: str = self.metadata["version"]
-        self._models: dict[str, dict[str, Any]] = {}
-        for stage, info in self.metadata["stages"].items():
-            self._models[stage] = {
-                task: self._load(info[task]["artifact"], info[task]["artifact_sha256"])
-                for task in ("classifier", "regressor")
-            }
+        try:
+            self.metadata: dict = json.loads(metadata_path.read_text(encoding="utf-8"))
+            self.version: str = self.metadata["version"]
+            self._models: dict[str, dict[str, Any]] = {}
+            for stage, info in self.metadata["stages"].items():
+                self._models[stage] = {
+                    task: self._load(info[task]["artifact"], info[task]["artifact_sha256"])
+                    for task in ("classifier", "regressor")
+                }
+        except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+            raise ModelUnavailableError(
+                f"Model metadata at {self.artifact_dir} is unreadable. Run: python -m ml.train"
+            ) from exc
 
     def _load(self, filename: str, expected_sha: str):
         path = self.artifact_dir / filename
         if not path.exists():
             raise ModelUnavailableError(f"Missing model artifact: {filename}")
-        # joblib executes code on load, so only exact files from training are accepted.
+        # Catches damaged or mismatched files. It is not protection against someone who can
+        # write to this folder, because the expected hash is stored here too. joblib executes
+        # code on load, so the folder itself must be writable only by trusted users.
         if hashlib.sha256(path.read_bytes()).hexdigest() != expected_sha:
             raise ModelUnavailableError(f"Integrity check failed for {filename}")
-        return joblib.load(path)
+        try:
+            return joblib.load(path)
+        except Exception as exc:  # unpickling can raise almost anything
+            raise ModelUnavailableError(f"Could not load model artifact: {filename}") from exc
 
     def _risk_level(self, stage: str, probability: float) -> str:
         bands = self.metadata["stages"][stage]["classifier"]["risk_bands"]
@@ -137,7 +150,9 @@ class PredictionPipeline:
             predicted_at_risk=bool(at_risk),
             risk_probability=round(probability, 4),
             risk_level=self._risk_level(stage, probability),
-            confidence=round(max(probability, 1 - probability), 4),
+            # The estimated chance of what the flag says, so it can never contradict the flag.
+            # A flagged student can be below 50%, because the threshold is set to catch more.
+            confidence=round(probability if at_risk else 1 - probability, 4),
             predicted_grade=round(grade, 2),
             grade_interval_low=round(max(0.0, grade - half_width), 2),
             grade_interval_high=round(min(20.0, grade + half_width), 2),
