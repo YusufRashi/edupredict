@@ -10,8 +10,11 @@ Behind the list, machine learning estimates the chance that a final course grade
 
 Predictions are decision support, not judgments about students. **The model does not predict dropout**: the dataset has no dropout label.
 
+![The weekly support list](docs/screenshots/this-week.png)
+
 ## Contents
 
+- [Screenshots](#screenshots)
 - [The weekly workflow](#the-weekly-workflow)
 - [Quick start with Docker](#quick-start-with-docker)
 - [Local development](#local-development)
@@ -24,6 +27,18 @@ Predictions are decision support, not judgments about students. **The model does
 - [Database](#database)
 - [Testing](#testing)
 - [Deployment](#deployment)
+
+## Screenshots
+
+All students shown are pseudonymous demonstration records from the public UCI dataset.
+
+| Dashboard | Student profile |
+| --- | --- |
+| ![Dashboard with pass rate, concern levels and grade distribution](docs/screenshots/dashboard.png) | ![Student profile with grade progress and latest predictions](docs/screenshots/student-profile.png) |
+| **Results** | **Student portal** |
+| ![Results page showing how flagged courses ended](docs/screenshots/results.png) | ![Student view of grades and shared recommendations](docs/screenshots/student-portal.png) |
+
+![Landing page](docs/screenshots/landing.png)
 
 ## The weekly workflow
 
