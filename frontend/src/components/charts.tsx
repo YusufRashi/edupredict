@@ -57,12 +57,14 @@ export function ChartCard({
   subtitle,
   head,
   rows,
+  controls,
   children,
 }: {
   title: string;
   subtitle?: string;
   head: string[];
   rows: ReactNode[][];
+  controls?: ReactNode;
   children: ReactNode;
 }) {
   const [asTable, setAsTable] = useState(false);
@@ -83,6 +85,7 @@ export function ChartCard({
           </button>
         }
       />
+      {controls && <div className="mb-4">{controls}</div>}
       {asTable ? (
         <div className="max-h-72 overflow-y-auto">
           <Table head={head}>
@@ -134,12 +137,12 @@ export function GradeDistributionChart({ data, subject }: { data: Distribution; 
   );
 }
 
-export function RiskDonut({ counts, title = "Academic concern levels", subtitle = "Latest prediction per student and subject." }: { counts: Record<RiskLevel, number>; title?: string; subtitle?: string }) {
+export function RiskDonut({ counts, title = "Academic concern levels", subtitle = "Latest prediction per student and subject.", controls }: { counts: Record<RiskLevel, number>; title?: string; subtitle?: string; controls?: ReactNode }) {
   const levels: RiskLevel[] = ["low", "moderate", "high"];
   const total = levels.reduce((sum, level) => sum + counts[level], 0);
   const data = levels.map((level) => ({ name: RISK_LABELS[level], level, value: counts[level] }));
   return (
-    <ChartCard title={title} subtitle={subtitle} head={["Level", "Courses", "Share"]} rows={data.map((row) => [row.name, row.value, total ? percent(row.value / total) : "—"])}>
+    <ChartCard title={title} subtitle={subtitle} controls={controls} head={["Level", "Courses", "Share"]} rows={data.map((row) => [row.name, row.value, total ? percent(row.value / total) : "—"])}>
       {total === 0 ? (
         <EmptyState title="No predictions yet" message="Run a prediction for a student to see this breakdown." />
       ) : (

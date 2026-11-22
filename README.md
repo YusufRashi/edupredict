@@ -2,12 +2,17 @@
 
 Student performance prediction and academic analytics for educators.
 
-EduPredict estimates the chance that a student's final course grade will fall below the pass mark, predicts the grade itself, and explains what contributed to each estimate. Educators, administrators and students each get their own role-restricted view.
+**The problem:** a teacher with 150 students can't watch all of them. Students slip quietly, nobody notices in time, and when someone does, the follow-up gets forgotten.
+
+**What EduPredict does:** it makes sure no struggling student is missed or forgotten. Each week, teachers open a short list of who needs attention, why, and what has changed. They record who will do what by when, overdue follow-ups rise to the top, and the school can see how flagged courses ended.
+
+Behind the list, machine learning estimates the chance that a final course grade will fall below the pass mark, and predicts the grade itself. Educators, administrators and students each get their own role-restricted view.
 
 Predictions are decision support, not judgments about students. **The model does not predict dropout**: the dataset has no dropout label.
 
 ## Contents
 
+- [The weekly workflow](#the-weekly-workflow)
 - [Quick start with Docker](#quick-start-with-docker)
 - [Local development](#local-development)
 - [Roles](#roles)
@@ -19,6 +24,29 @@ Predictions are decision support, not judgments about students. **The model does
 - [Database](#database)
 - [Testing](#testing)
 - [Deployment](#deployment)
+
+## The weekly workflow
+
+| Step | Where | What happens |
+| --- | --- | --- |
+| 1. Keep records current | Students, Datasets | Grades and absences are entered by hand or imported from a CSV |
+| 2. Update the list | This week, **Update from records** | Only courses whose records changed are re-scored |
+| 3. See who needs attention | This week | Sorted by urgency: overdue first, then students who just got worse |
+| 4. See what changed | This week | Plain statements, such as "Absences up from 4 to 25" |
+| 5. Plan support | This week, student profile | A step, a person responsible and a follow-up date |
+| 6. Follow through | This week, student profile | Mark done with what happened, reschedule or cancel |
+| 7. See how it went | Results | What was flagged, what was done, and how those courses ended |
+
+A course leaves the list when its final grade is recorded. After a step is completed, the course waits for new results, and comes back if a new prediction still flags it.
+
+**What Results can't tell you:** it counts what happened, but doesn't prove that support caused a result, because teachers may choose to help some students over others. Showing that the system helps would need a proper evaluation at a real school.
+
+**Current limits:**
+
+- Every educator sees every student, because classes aren't assigned to teachers yet.
+- Reminders appear in the app only. There are no emails or notifications.
+- Records are updated by hand or CSV. There's no connection to a school information system.
+- Demo students stay on the list even though their final grades are known, so the workflow can be tried. The list says so.
 
 ## Quick start with Docker
 
@@ -92,6 +120,7 @@ npm run dev                       # http://localhost:5173, proxies /api to port 
 | Manage users and platform settings | Yes | | |
 | View platform activity and audit trail | Yes | | |
 | Upload and import datasets | Yes | If an admin allows it | |
+| Weekly list, support plans and results | Yes | Yes | |
 | Manage students and academic records | Yes | Yes | |
 | Run and review predictions, view history | Yes | Yes | |
 | Analytics, model information, reports and exports | Yes | Yes | |
@@ -198,6 +227,7 @@ Interactive documentation is generated from the code at `/api/docs`. The main gr
 | Users (admin) | `GET`, `POST /api/users`; `PUT`, `DELETE /api/users/{id}` |
 | Students | `GET`, `POST /api/students`; `GET`, `PUT`, `DELETE /api/students/{id}`; `GET /api/students/me` |
 | Records and advice | `POST`, `PUT`, `DELETE` under `/api/students/{id}/records`; `POST`, `PATCH`, `DELETE` under `/api/students/{id}/recommendations` |
+| Support workflow | `GET /api/support/watchlist`, `results`, `staff`; `POST /api/support/refresh`; `GET`, `POST /api/support/actions`; `PATCH`, `DELETE /api/support/actions/{id}` |
 | Predictions | `POST`, `GET /api/predictions`; `GET /api/predictions/{id}`; `POST /api/predictions/{id}/review`; `GET /api/predictions/options` |
 | Analytics | `GET /api/analytics/overview`, `performance`, `distribution`, `trends`, `attention`, `system` |
 | Model | `GET /api/model/info`, `metrics`, `versions` |
@@ -207,7 +237,7 @@ Interactive documentation is generated from the code at `/api/docs`. The main gr
 
 ## Database
 
-PostgreSQL 16, with migrations managed by Alembic. The tables are `users`, `students`, `academic_records`, `predictions`, `prediction_history`, `model_versions`, `academic_recommendations`, `datasets`, `system_settings` and `audit_logs`. Student identity is stored once in `students`, and everything else references it.
+PostgreSQL 16, with migrations managed by Alembic. The tables are `users`, `students`, `academic_records`, `predictions`, `prediction_history`, `model_versions`, `academic_recommendations`, `support_actions`, `datasets`, `system_settings` and `audit_logs`. Student identity is stored once in `students`, and everything else references it.
 
 ```bash
 alembic upgrade head                         # apply migrations
@@ -228,6 +258,19 @@ TEST_DATABASE_URL=postgresql+psycopg://user:password@host/test_db python -m pyte
 npm test
 npm run typecheck
 ```
+
+## Image credits
+
+The photos in `frontend/public/images/` come from [Unsplash](https://unsplash.com/license) and are decorative. They don't show a real school or real users of this software.
+
+| File | Source |
+| --- | --- |
+| `library.webp` | `images.unsplash.com/photo-1427504494785-3a9ca7044f45` |
+| `books.webp` | `images.unsplash.com/photo-1497633762265-9d179a990aa6` |
+| `desk.webp` | `images.unsplash.com/photo-1503676260728-1c00da094a0b` |
+| `teachers.webp` | `images.unsplash.com/photo-1522202176988-66273c2fd55f` |
+
+The book illustration on empty pages was drawn for this project.
 
 ## Deployment
 

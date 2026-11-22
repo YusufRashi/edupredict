@@ -22,6 +22,7 @@ from app.routes import (
     reports,
     settings,
     students,
+    support,
     users,
 )
 from app.services.predictions import get_pipeline, sync_model_versions
@@ -115,8 +116,8 @@ async def unhandled(_: Request, exc: Exception) -> JSONResponse:
 
 
 api = APIRouter(prefix="/api")
-for module in (auth, users, students, predictions, analytics, model_info, reports, datasets,
-               settings):
+for module in (auth, users, students, support, predictions, analytics, model_info, reports,
+               datasets, settings):
     api.include_router(module.router)
 
 

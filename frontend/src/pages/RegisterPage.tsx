@@ -46,7 +46,7 @@ export function RegisterPage() {
   };
 
   return (
-    <AuthShell title="Create an account" subtitle="Register as a student. Administrators create educator accounts.">
+    <AuthShell title="Create an account" subtitle="Register as a student. Administrators create educator accounts." image="/images/desk.webp" imagePosition="28% center">
       <form onSubmit={submit} className="space-y-4" noValidate={false}>
         <TextField label="Full name" autoComplete="name" required maxLength={120} value={fullName} onChange={(e) => setFullName(e.target.value)} />
         <TextField label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

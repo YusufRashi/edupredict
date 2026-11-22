@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import type { PredictionSummary } from "../api/types";
 import { dateTime, grade, percent, STAGE_LABELS, SUBJECT_LABELS } from "../format";
-import { DemoBadge, RiskBadge, TD, Table } from "./ui";
+import { DemoBadge, RiskBadge, ScoreBar, TD, Table } from "./ui";
+
+const BAR_COLORS = { low: "#0CA30C", moderate: "#FAB219", high: "#D03B3B" };
 
 export function PredictionTable({ items, detailed = false }: { items: PredictionSummary[]; detailed?: boolean }) {
   const head = detailed
@@ -21,7 +23,7 @@ export function PredictionTable({ items, detailed = false }: { items: Prediction
           {detailed && <TD className="whitespace-nowrap">{STAGE_LABELS[item.stage]}</TD>}
           <TD><RiskBadge level={item.risk_level} /></TD>
           {detailed && <TD>{percent(item.risk_probability)}</TD>}
-          <TD className="whitespace-nowrap">{grade(item.predicted_grade)} / 20</TD>
+          <TD><ScoreBar value={item.predicted_grade} max={20} label={`${grade(item.predicted_grade)} / 20`} color={BAR_COLORS[item.risk_level]} /></TD>
           {detailed && <TD>{item.actual_final_grade ?? "—"}</TD>}
           {detailed && <TD className="whitespace-nowrap text-slate-brand">{dateTime(item.created_at)}</TD>}
         </tr>

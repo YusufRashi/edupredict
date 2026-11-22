@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -274,6 +274,57 @@ class StudentDetail(BaseModel):
     records: list[RecordOut]
     latest_predictions: list[PredictionSummary] = []
     recommendations: list[RecommendationOut] = []
+
+
+# ---- Support workflow ----
+ActionType = Literal["tutoring", "meeting", "family_contact", "attendance_plan", "referral",
+                     "other"]
+ActionStatus = Literal["planned", "done", "cancelled"]
+WatchState = Literal["overdue", "needs_action", "in_progress", "followed_up"]
+
+
+class ActionCreate(BaseModel):
+    student_id: int
+    subject: Subject
+    action_type: ActionType
+    due_date: date
+    note: str | None = Field(default=None, max_length=2000)
+    owner_id: int | None = None
+    prediction_id: int | None = None
+
+
+class ActionUpdate(BaseModel):
+    status: ActionStatus | None = None
+    due_date: date | None = None
+    note: str | None = Field(default=None, max_length=2000)
+    outcome_note: str | None = Field(default=None, max_length=2000)
+    owner_id: int | None = None
+
+
+class ActionOut(BaseModel):
+    id: int
+    student_id: int
+    student_name: str
+    student_code: str
+    is_demo: bool
+    subject: Subject
+    prediction_id: int | None
+    action_type: ActionType
+    note: str | None
+    status: ActionStatus
+    due_date: date
+    is_overdue: bool
+    owner_id: int | None
+    owner_name: str | None
+    outcome_note: str | None
+    completed_at: datetime | None
+    created_by_name: str | None
+    created_at: datetime
+
+
+class StaffMember(BaseModel):
+    id: int
+    full_name: str
 
 
 # ---- Settings and datasets ----

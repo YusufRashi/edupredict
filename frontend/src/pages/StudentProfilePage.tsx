@@ -7,6 +7,7 @@ import { useApi } from "../api/useApi";
 import { StudentProgressChart } from "../components/charts";
 import { PredictionTable } from "../components/PredictionTable";
 import { RecommendationFormModal, RecordFormModal, StudentFormModal } from "../components/StudentForms";
+import { StudentActionsCard } from "../components/SupportActions";
 import {
   Button,
   buttonClass,
@@ -118,6 +119,14 @@ export default function StudentProfilePage() {
             Linked student login: {student.linked_user_email ?? "none"}
           </p>
         </Card>
+      </div>
+
+      <div className="mt-4">
+        <StudentActionsCard
+          studentId={student.id}
+          studentName={student.full_name}
+          subjects={[...new Set(student.records.map((record) => record.subject))]}
+        />
       </div>
 
       <div className="mt-4">

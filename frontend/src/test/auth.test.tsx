@@ -18,7 +18,7 @@ describe("login form", () => {
   it("stores the session and leaves the login page on success", async () => {
     vi.spyOn(api, "get").mockResolvedValue({ data: makeUser("educator") });
     const post = vi.spyOn(api, "post").mockResolvedValue({ data: { access_token: "abc", token_type: "bearer", expires_in: 3600, user: makeUser("educator") } });
-    renderApp(<Routes><Route path="/login" element={<LoginPage />} /><Route path="/dashboard" element={<p>Dashboard here</p>} /></Routes>, "/login");
+    renderApp(<Routes><Route path="/login" element={<LoginPage />} /><Route path="/this-week" element={<p>Dashboard here</p>} /></Routes>, "/login");
 
     await userEvent.type(screen.getByLabelText("Email"), "educator@example.com");
     await userEvent.type(screen.getByLabelText("Password"), "CorrectHorse42");
@@ -83,7 +83,7 @@ describe("protected routes", () => {
     <Routes>
       <Route path="/login" element={<p>Login page</p>} />
       <Route path="/my-progress" element={<p>Student portal</p>} />
-      <Route path="/dashboard" element={<p>Dashboard here</p>} />
+      <Route path="/this-week" element={<p>Weekly list</p>} />
       <Route element={<ProtectedRoute roles={["admin"]} />}>
         <Route path="/users" element={<p>User management</p>} />
       </Route>
@@ -107,10 +107,10 @@ describe("protected routes", () => {
     expect(screen.queryByText("User management")).not.toBeInTheDocument();
   });
 
-  it("sends an educator away from an admin page to the dashboard", () => {
+  it("sends an educator away from an admin page to the weekly list", () => {
     signIn("educator");
     renderApp(routes, "/users");
-    expect(screen.getByText("Dashboard here")).toBeInTheDocument();
+    expect(screen.getByText("Weekly list")).toBeInTheDocument();
   });
 
   it("lets an admin in", () => {

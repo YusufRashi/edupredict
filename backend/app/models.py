@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -29,6 +30,8 @@ ROLES = ("admin", "educator", "student")
 SUBJECTS = ("math", "portuguese")
 RISK_LEVELS = ("low", "moderate", "high")
 STAGES = ("intake", "period1", "period2")
+ACTION_TYPES = ("tutoring", "meeting", "family_contact", "attendance_plan", "referral", "other")
+ACTION_STATUSES = ("planned", "done", "cancelled")
 
 
 def _in(column: str, values: tuple[str, ...]) -> str:
@@ -269,6 +272,45 @@ class AcademicRecommendation(Base):
     )
 
     student: Mapped[Student] = relationship(back_populates="recommendations")
+
+
+class SupportAction(Base):
+    """A step someone has agreed to take for a student in a subject, and how it went."""
+
+    __tablename__ = "support_actions"
+    __table_args__ = (
+        CheckConstraint(_in("subject", SUBJECTS), name="subject_valid"),
+        CheckConstraint(_in("action_type", ACTION_TYPES), name="action_type_valid"),
+        CheckConstraint(_in("status", ACTION_STATUSES), name="status_valid"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    student_id: Mapped[int] = mapped_column(
+        ForeignKey("students.id", ondelete="CASCADE"), index=True
+    )
+    subject: Mapped[str] = mapped_column(String(20))
+    # The prediction that prompted this step. Staff can also act without one.
+    prediction_id: Mapped[int | None] = mapped_column(
+        ForeignKey("predictions.id", ondelete="SET NULL")
+    )
+    action_type: Mapped[str] = mapped_column(String(30))
+    note: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(12), default="planned", index=True)
+    due_date: Mapped[date] = mapped_column(Date, index=True)
+    owner_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
+    outcome_note: Mapped[str | None] = mapped_column(Text)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+    student: Mapped[Student] = relationship()
+    owner: Mapped[User | None] = relationship(foreign_keys=[owner_id])
+    created_by: Mapped[User | None] = relationship(foreign_keys=[created_by_id])
 
 
 class SystemSetting(Base):

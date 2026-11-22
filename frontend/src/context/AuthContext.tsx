@@ -113,5 +113,10 @@ export function useAuth(): AuthValue {
   return value;
 }
 
-export const homeFor = (user: User): string =>
-  user.role === "student" ? "/my-progress" : "/dashboard";
+const HOME: Record<User["role"], string> = {
+  student: "/my-progress",
+  educator: "/this-week",
+  admin: "/dashboard",
+};
+
+export const homeFor = (user: User): string => HOME[user.role];

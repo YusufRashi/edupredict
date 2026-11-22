@@ -2,12 +2,14 @@ import { lazy, Suspense } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { buttonClass, LoadingCards } from "./components/ui";
+import { buttonClass, EmptyIllustration, LoadingCards } from "./components/ui";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 
 // Split by page, because the charting library is large and the landing page does not need it.
+const ThisWeekPage = lazy(() => import("./pages/ThisWeekPage"));
+const ResultsPage = lazy(() => import("./pages/ResultsPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const StudentsPage = lazy(() => import("./pages/StudentsPage"));
 const StudentProfilePage = lazy(() => import("./pages/StudentProfilePage"));
@@ -25,6 +27,7 @@ const StudentPortalPage = lazy(() => import("./pages/StudentPortalPage"));
 function NotFound() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+      <EmptyIllustration className="h-36 w-48" />
       <h1 className="text-2xl font-semibold">Page not found</h1>
       <p className="text-sm text-slate-brand">That page does not exist, or it has moved.</p>
       <Link to="/" className={buttonClass()}>Go to the home page</Link>
@@ -49,6 +52,8 @@ export function App() {
             </Route>
 
             <Route element={<ProtectedRoute roles={["admin", "educator"]} />}>
+              <Route path="/this-week" element={<ThisWeekPage />} />
+              <Route path="/results" element={<ResultsPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/students" element={<StudentsPage />} />
               <Route path="/students/:id" element={<StudentProfilePage />} />

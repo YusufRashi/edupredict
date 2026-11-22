@@ -5,15 +5,25 @@ import { Logo } from "../components/Layout";
 import { Button, Notice, TextField } from "../components/ui";
 import { homeFor, useAuth } from "../context/AuthContext";
 
-export function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+export function AuthShell({ title, subtitle, children, image = "/images/books.webp", imagePosition = "center" }: { title: string; subtitle: string; children: React.ReactNode; image?: string; imagePosition?: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-lavender p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-card">
-        <Link to="/" aria-label="EduPredict home"><Logo /></Link>
-        <h1 className="mt-6 text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="mt-1 mb-6 text-sm text-slate-brand">{subtitle}</p>
-        {children}
+    <main className="grid min-h-screen bg-white lg:grid-cols-2">
+      <div className="flex items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-md">
+          <Link to="/" aria-label="EduPredict home"><Logo /></Link>
+          <h1 className="mt-8 text-3xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-1 mb-6 text-sm text-slate-brand">{subtitle}</p>
+          {children}
+        </div>
       </div>
+      <aside className="relative hidden overflow-hidden bg-brand-dark lg:block">
+        <img src={image} alt="" className="absolute inset-0 size-full object-cover" style={{ objectPosition: imagePosition }} />
+        <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/70 to-brand/25" />
+        <div className="absolute inset-x-0 bottom-0 p-12 text-white">
+          <p className="text-3xl font-semibold tracking-tight">No student missed.<br />No follow-up forgotten.</p>
+          <p className="mt-3 max-w-md text-white/90">A weekly list of who needs support, what changed, and what is being done about it.</p>
+        </div>
+      </aside>
     </main>
   );
 }

@@ -2,7 +2,7 @@ import { BookOpen, CalendarX, CheckCircle2, Lightbulb, Link2Off } from "lucide-r
 import type { StudentDetail } from "../api/types";
 import { useApi } from "../api/useApi";
 import { StudentProgressChart } from "../components/charts";
-import { Card, CardTitle, DemoBadge, EmptyState, ErrorState, LoadingCards, Notice, PageHeader, Pill, StatCard, TD, Table } from "../components/ui";
+import { Card, CardTitle, DemoBadge, EmptyState, ErrorState, LoadingCards, Notice, PageBanner, PageHeader, Pill, StatCard, TD, Table } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
 import { grade, STUDY_TIME_LABELS, SUBJECT_LABELS } from "../format";
 
@@ -38,7 +38,7 @@ export default function StudentPortalPage() {
 
   return (
     <>
-      <PageHeader title={`Welcome, ${data.full_name}`} subtitle={[data.student_code, data.year_group].filter(Boolean).join(" · ")} />
+      <PageBanner title={`Welcome, ${data.full_name}`} subtitle={[data.student_code, data.year_group].filter(Boolean).join(" · ")} image="/images/library.webp" position="center 35%" />
       {data.is_demo && (
         <div className="mb-4">
           <Notice><span className="mr-2"><DemoBadge /></span>This is a demonstration account using a pseudonymous record from a public dataset.</Notice>
@@ -46,9 +46,9 @@ export default function StudentPortalPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Average final grade" value={grade(average)} hint={finals.length ? `Out of 20, from ${finals.length} ${finals.length === 1 ? "course" : "courses"}` : "No final grades yet"} icon={<BookOpen className="size-4" aria-hidden />} />
-        <StatCard label="Courses passed" value={finals.length ? `${passed} of ${finals.length}` : "—"} hint={`Pass mark is ${PASS_MARK} out of 20`} icon={<CheckCircle2 className="size-4" aria-hidden />} />
-        <StatCard label="Absences" value={absences} hint="Across all your courses" icon={<CalendarX className="size-4" aria-hidden />} />
+        <StatCard tone="blue" label="Average final grade" value={grade(average)} hint={finals.length ? `Out of 20, from ${finals.length} ${finals.length === 1 ? "course" : "courses"}` : "No final grades yet"} icon={<BookOpen className="size-4" aria-hidden />} />
+        <StatCard tone="green" label="Courses passed" value={finals.length ? `${passed} of ${finals.length}` : "—"} hint={`Pass mark is ${PASS_MARK} out of 20`} icon={<CheckCircle2 className="size-4" aria-hidden />} />
+        <StatCard tone="peach" label="Absences" value={absences} hint="Across all your courses" icon={<CalendarX className="size-4" aria-hidden />} />
       </div>
 
       <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">

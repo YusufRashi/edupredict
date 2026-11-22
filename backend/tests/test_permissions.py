@@ -23,7 +23,7 @@ def test_route_list_is_not_empty():
 def test_every_non_public_route_rejects_anonymous_requests(client, method, path):
     url = path
     for name in ("student_id", "record_id", "recommendation_id", "prediction_id", "dataset_id",
-                 "user_id"):
+                 "user_id", "action_id"):
         url = url.replace("{" + name + "}", "1")
     assert client.request(method, url).status_code == 401
 
@@ -33,6 +33,8 @@ STAFF_ONLY_GET = [
     "/api/analytics/overview", "/api/analytics/performance", "/api/analytics/distribution",
     "/api/analytics/trends", "/api/analytics/attention", "/api/model/info", "/api/model/metrics",
     "/api/model/versions", "/api/reports/performance", "/api/reports/risk",
+    "/api/support/watchlist", "/api/support/actions", "/api/support/results",
+    "/api/support/staff",
 ]
 ADMIN_ONLY_GET = ["/api/users", "/api/settings", "/api/analytics/system"]
 

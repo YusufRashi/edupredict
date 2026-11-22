@@ -327,6 +327,77 @@ export interface Report {
   rows: Record<string, string | number | null>[];
 }
 
+export type ActionType = "tutoring" | "meeting" | "family_contact" | "attendance_plan" | "referral" | "other";
+export type ActionStatus = "planned" | "done" | "cancelled";
+export type WatchState = "overdue" | "needs_action" | "in_progress" | "followed_up";
+
+export interface SupportAction {
+  id: number;
+  student_id: number;
+  student_name: string;
+  student_code: string;
+  is_demo: boolean;
+  subject: Subject;
+  prediction_id: number | null;
+  action_type: ActionType;
+  note: string | null;
+  status: ActionStatus;
+  due_date: string;
+  is_overdue: boolean;
+  owner_id: number | null;
+  owner_name: string | null;
+  outcome_note: string | null;
+  completed_at: string | null;
+  created_by_name: string | null;
+  created_at: string;
+}
+
+export interface WatchItem {
+  student_id: number;
+  student_name: string;
+  student_code: string;
+  year_group: string | null;
+  is_demo: boolean;
+  subject: Subject;
+  prediction_id: number;
+  risk_level: RiskLevel;
+  risk_probability: number;
+  predicted_grade: number;
+  assessed_at: string;
+  state: WatchState;
+  reasons: string[];
+  changes: { direction: "worse" | "better"; text: string }[];
+  next_action: SupportAction | null;
+  actions_done: number;
+}
+
+export interface Watchlist extends Page<WatchItem> {
+  counts: Record<WatchState, number>;
+}
+
+export interface OutcomeGroup {
+  courses: number;
+  finals_known: number;
+  passed: number;
+  pass_rate: number | null;
+  small_group: boolean;
+}
+
+export interface SupportResults {
+  pass_mark: number;
+  include_demo: boolean;
+  flagged_courses: number;
+  demo_courses: number;
+  actions: { total: number; planned: number; overdue: number; done: number; cancelled: number };
+  with_completed_action: OutcomeGroup;
+  without_completed_action: OutcomeGroup;
+}
+
+export interface StaffMember {
+  id: number;
+  full_name: string;
+}
+
 export interface PlatformSettings {
   allow_public_registration: boolean;
   educators_can_upload_datasets: boolean;

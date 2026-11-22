@@ -1,4 +1,4 @@
-import type { RiskLevel, StageKey, Subject } from "./api/types";
+import type { ActionType, RiskLevel, StageKey, Subject } from "./api/types";
 
 export const SUBJECT_LABELS: Record<Subject, string> = { math: "Mathematics", portuguese: "Portuguese" };
 export const STAGE_LABELS: Record<StageKey, string> = {
@@ -16,6 +16,27 @@ export const STUDY_TIME_LABELS: Record<number, string> = {
   2: "2 to 5 hours",
   3: "5 to 10 hours",
   4: "Over 10 hours",
+};
+
+export const ACTION_LABELS: Record<ActionType, string> = {
+  tutoring: "Tutoring",
+  meeting: "One-to-one meeting",
+  family_contact: "Contact family",
+  attendance_plan: "Attendance plan",
+  referral: "Refer to school support",
+  other: "Other",
+};
+
+/** A date-only value from the API, shown without shifting across time zones. */
+export const dueDate = (value: string): string =>
+  new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { dateStyle: "medium" });
+
+/** Today or a later day in the viewer's time zone, as YYYY-MM-DD. */
+export const localDate = (daysAhead = 0): string => {
+  const day = new Date();
+  day.setDate(day.getDate() + daysAhead);
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`;
 };
 
 export const percent = (value: number | null | undefined, digits = 0): string =>
