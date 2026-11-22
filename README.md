@@ -85,6 +85,16 @@ docker compose up -d --build
 
 The first build trains the models from the bundled data, so it takes a few minutes.
 
+> **Windows: `additional privileges requested: pass "--allow=fs.read=backend\Dockerfile"`**
+> Newer Docker Compose builds through `buildx bake`, which compares paths case-sensitively. If your terminal's current folder starts with a lowercase drive letter (`c:\...`, common in VS Code terminals), bake thinks the Dockerfile is outside the build folder and refuses. Either `cd` into the project using an uppercase drive letter (`cd C:\path\to\edupredict`), or turn off that check for the build:
+>
+> ```powershell
+> $env:BUILDX_BAKE_ENTITLEMENTS_FS = "0"; docker compose up -d --build   # PowerShell
+> ```
+> ```bash
+> BUILDX_BAKE_ENTITLEMENTS_FS=0 docker compose up -d --build             # Git Bash
+> ```
+
 | What | Where |
 | --- | --- |
 | Web app | http://localhost:8088 |
